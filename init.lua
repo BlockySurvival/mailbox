@@ -215,8 +215,6 @@ function mailbox.on_metadata_inventory_put(pos, listname, index, stack, player)
 			inv:remove_item("drop", stack)
 			stack = mailbox.send_to_player(meta:get_string('owner'), stack)
 			if not stack:is_empty() then
-				minetest.chat_send_player(player:get_player_name(),
-					"ACK! The thing broke again.")
 				inv:add_item("drop", stack)
 			end
 		else
