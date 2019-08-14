@@ -22,10 +22,10 @@ storage and temporarily loaded into a player inventory list for online players.
     `player_or_name`'s global mailbox inventory. Returns an ItemStack
     containing whatever couldn't fit into the mailbox.
  - `mailbox.get_mailbox_inv_list(name)`: Similar to
-    `player:get_inventory:get_list("mailbox")`, however also works with offline
-    players.
+    `player:get_inventory():get_list("mailbox")`, however also works with
+    offline players.
  - `mailbox.set_mailbox_inv_list(name, list)`: Similar to
-    `player:get_inventory:set_list("mailbox", new_list)`, however also works
+    `player:get_inventory():set_list("mailbox", new_list)`, however also works
     with offline players and saves the inventory list correctly.
 
 *Note that setting a player's `mailbox` list directly (with
