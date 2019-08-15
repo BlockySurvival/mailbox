@@ -35,8 +35,8 @@ minetest.register_on_joinplayer(function(player)
 	inv:set_size("mailbox", inv_size)
 	local list = get_stored_inv(player:get_player_name())
 	if list then
-		for id, stack in ipairs(list) do
-			list[id] = ItemStack(stack)
+		for id = 1, inv_size do
+			list[id] = ItemStack(list[id])
 		end
 		inv:set_list("mailbox", list)
 	end
