@@ -184,8 +184,10 @@ function mailbox.get_mailbox_inv_list(name)
 	local player = minetest.get_player_by_name(name)
 	if player then return player:get_inventory():get_list("mailbox") end
 	local inv = get_stored_inv(name)
-	for id = 1, inv_size do
-		inv[id] = ItemStack(inv[id])
+	if inv then
+		for id = 1, inv_size do
+			inv[id] = ItemStack(inv[id])
+		end
 	end
 	return inv
 end
