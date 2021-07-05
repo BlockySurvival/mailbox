@@ -207,7 +207,7 @@ function mailbox.can_dig(pos, player)
 	local player_name = player:get_player_name()
 	local inv = meta:get_inventory()
 
-	return inv:is_empty("mailbox") and player and player_name == owner
+	return inv:is_empty("mailbox") and player and (player_name == owner or minetest.check_player_privs(player_name, { protection_bypass = true }))
 end
 
 function mailbox.on_metadata_inventory_put(pos, listname, index, stack, player)
