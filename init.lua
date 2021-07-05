@@ -9,7 +9,7 @@ local storage = minetest.get_mod_storage()
 local modpath = minetest.get_modpath('mailbox')
 assert(loadfile(modpath .. '/global_storage.lua'))(storage)
 
-function mailbox.get_formspec(pos, owner, fs_type)
+function mailbox.get_formspec(pos, owner, accessor, fs_type)
 	local selected = "false"
 	if minetest.get_node(pos).name == "mailbox:letterbox" then
 		selected = "true"
@@ -17,7 +17,7 @@ function mailbox.get_formspec(pos, owner, fs_type)
 	local xbg = default.gui_bg .. default.gui_bg_img .. default.gui_slots
 	local spos = pos.x .. "," ..pos.y .. "," .. pos.z
 
-	if fs_type == 1 then
+	if fs_type == 1 and (owner == accessor or minetest.check_player_privs(accessor, { protection_bypass = true })) then
 		local meta = minetest.get_meta(pos)
 		local global_storage = meta:get_string("storage_method") == "player"
 		local fs = "size[8,9.5]" .. xbg .. default.get_hotbar_bg(0, 5.5) ..
@@ -25,11 +25,14 @@ function mailbox.get_formspec(pos, owner, fs_type)
 				"]" ..
 			"checkbox[0,0.25;global_storage;Use global storage (\"ender che" ..
 				"st\" mode);" .. (global_storage and "true" or "false") .. "]"
-
 		if not global_storage then
 			fs = fs ..
 				"list[nodemeta:" .. spos .. ";mailbox;0,1;8,4;]" ..
 				"listring[nodemeta:" .. spos .. ";mailbox]"
+		elseif minetest.check_player_privs(accessor, { protection_bypass = true }) then
+			fs = fs ..
+				"label[0,1;You cannot access the global mailbox contents of another player.]"..
+				"label[0,1.3;This should be considered an issue, not an intentional feature.]"
 		elseif minetest.get_player_by_name(owner) then
 			fs = fs ..
 				"list[current_player;mailbox;0,1;8,4;]" ..
@@ -96,7 +99,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 
 	-- Validate the owner
 	local meta = minetest.get_meta(pos)
-	if meta:get_string("owner") ~= pname then
+	if meta:get_string("owner") ~= pname and not minetest.check_player_privs(pname, { protection_bypass = true }) then
 		-- This should never happen, maybe this should crash the client.
 		minetest.chat_send_player(pname,
 			"That's not your mailbox to mess with!")
@@ -146,7 +149,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 
 		meta:set_string("storage_method", global_storage and "player" or "")
 		minetest.show_formspec(pname, formname,
-			mailbox.get_formspec(pos, pname, 1))
+			mailbox.get_formspec(pos, meta:get_string("owner"), pname, 1))
 	end
 end)
 
@@ -188,13 +191,13 @@ function mailbox.on_rightclick(pos, _, clicker)
 		mailbox.unrent(pos, clicker)
 		return
 	end
-	if player == owner then
+	if player == owner or minetest.check_player_privs(player, { protection_bypass = true }) then
 		local spos = pos.x .. "," .. pos.y .. "," .. pos.z
 		minetest.show_formspec(player, "mailbox:mailbox_" .. spos,
-			mailbox.get_formspec(pos, owner, 1))
+			mailbox.get_formspec(pos, owner, player, 1))
 	else
 		minetest.show_formspec(player, "mailbox:mailbox",
-			mailbox.get_formspec(pos, owner, 0))
+			mailbox.get_formspec(pos, owner, player, 0))
 	end
 end
 
@@ -204,7 +207,7 @@ function mailbox.can_dig(pos, player)
 	local player_name = player:get_player_name()
 	local inv = meta:get_inventory()
 
-	return inv:is_empty("mailbox") and player and player_name == owner
+	return inv:is_empty("mailbox") and player and (player_name == owner or minetest.check_player_privs(player_name, { protection_bypass = true }))
 end
 
 function mailbox.on_metadata_inventory_put(pos, listname, index, stack, player)
@@ -228,6 +231,9 @@ end
 
 function mailbox.allow_metadata_inventory_put(pos, listname, index, stack,
 		player)
+	if minetest.check_player_privs(player:get_player_name(), { protection_bypass = true }) then
+		return stack:get_count()
+	end
 	if listname ~= "drop" then return 0 end
 	if minetest.get_node(pos).name == "mailbox:letterbox" and
 			stack:get_name() ~= "default:book_written" then
