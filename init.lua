@@ -29,11 +29,11 @@ function mailbox.get_formspec(pos, owner, accessor, fs_type)
 			fs = fs ..
 				"list[nodemeta:" .. spos .. ";mailbox;0,1;8,4;]" ..
 				"listring[nodemeta:" .. spos .. ";mailbox]"
-		elseif minetest.check_player_privs(accessor, { protection_bypass = true }) then
+		elseif owner ~= accessor and minetest.check_player_privs(accessor, { protection_bypass = true }) then
 			fs = fs ..
 				"label[0,1;You cannot access the global mailbox contents of another player.]"..
 				"label[0,1.3;This should be considered an issue, not an intentional feature.]"
-		elseif minetest.get_player_by_name(owner) then
+		elseif owner == accessor and minetest.get_player_by_name(owner) then
 			fs = fs ..
 				"list[current_player;mailbox;0,1;8,4;]" ..
 				"listring[current_player;mailbox]"
