@@ -113,9 +113,9 @@ end
 
 -- Check if the player's global mailbox has room for an item.
 function mailbox.room_for_item(player, stack)
-	local name, player = get_player(player)
-	if player then
-		return player:get_inventory():room_for_item("mailbox", stack)
+	local name, playername = get_player(player)
+	if playername then
+		return playername:get_inventory():room_for_item("mailbox", stack)
 	end
 
 	-- Get the stored inventory
@@ -136,9 +136,9 @@ end
 
 -- Actually send something. Returns leftover ItemStack.
 function mailbox.send_to_player(player, stack)
-	local name, player = get_player(player)
-	if player then
-		return player:get_inventory():add_item("mailbox", stack)
+	local name, playername = get_player(player)
+	if playername then
+		return playername:get_inventory():add_item("mailbox", stack)
 	end
 
 	-- Get the stored inventory
